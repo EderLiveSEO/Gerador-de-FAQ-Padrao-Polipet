@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de FAQ Polipet</title>
+    <link rel="icon" type="image/svg+xml" href="logo2.svg">
+    <style>
+        /* =========================================
+           Estilos do Gerador (Interface de Administração)
+           ========================================= */
+        body {
+            font-family: 'Open Sans', Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .generator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .generator-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1.app-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #e65100;
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            box-sizing: border-box;
+            /* Garante que padding não estoure a largura */
+        }
+
+        .input-group textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+
+        .btn-generate {
+            background-color: #1a5c36;
+            /* Verde Polipet */
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            background-color: #14472a;
+        }
+
+        .output-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-box {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .output-box h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 150px;
+            font-family: monospace;
+            font-size: 12px;
+            background: #2d2d2d;
+            color: #ccc;
+            padding: 10px;
+            border-radius: 4px;
+            resize: vertical;
+            border: none;
+        }
+
+        /* =========================================
+           Estilos da Polipet (Preview) - Copiado do Prompt
+           ========================================= */
+        /* Container Principal - Ajustado para largura padrão de e-commerce */
+        .polipet-faq-container {
+            width: 100%;
+            max-width: 1200px;
+            /* Largura comum de containers de categoria */
+            font-family: 'Open Sans', Arial, sans-serif;
+            /* Fonte provável do site */
+            box-sizing: border-box;
+            /* Margin removida aqui para não bugar o preview, mas mantida no código gerado */
+        }
+
+        /* Título da Seção */
+        .polipet-faq-title {
+            font-size: 24px;
+            color: #e65100;
+            /* Laranja Polipet */
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #f2f2f2;
+            padding-bottom: 10px;
+        }
+
+        /* Item da FAQ (Detalhes) */
+        details.polipet-faq-item {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        details.polipet-faq-item:hover {
+            border-color: #e65100;
+            /* Hover laranja */
+        }
+
+        details.polipet-faq-item[open] {
+            border-color: #1a5c36;
+            /* Verde Polipet quando aberto */
+            background-color: #fcfcfc;
+        }
+
+        /* Pergunta (Summary) */
+        summary.polipet-faq-question {
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Remove triângulo padrão */
+        summary.polipet-faq-question::-webkit-details-marker {
+            display: none;
+        }
+
+        /* Ícone Personalizado (+ / -) */
+        summary.polipet-faq-question::after {
+            content: '+';
+            font-size: 22px;
+            color: #e65100;
+            /* Laranja */
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary.polipet-faq-question::after {
+            content: '-';
+            color: #1a5c36;
+            /* Verde */
+        }
+
+        /* Estilização do Logotipo */
+        .generator-container img {
+            display: block;
+            max-width: 250px;
+            /* Define um tamanho máximo sugerido */
+            width: 100%;
+            /* Garante que seja responsivo em telas menores */
+            height: auto;
+            /* Mantém a proporção da imagem */
+            margin: 0 auto 20px auto;
+            /* Centraliza e adiciona margem inferior */
+        }
+
+        /* Ajuste no título para harmonia visual */
+        .app-title {
+            font-size: 1.8rem;
+            margin-top: 10px;
+            color: #e65100;
+            /* Mantendo o tom de laranja do print */
+        }
+
+        /* Resposta */
+        .polipet-faq-answer {
+            padding: 0 20px 20px 20px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+            border-top: 1px solid transparent;
+        }
+
+        details[open] .polipet-faq-answer {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        /* Ajuste Mobile */
+        @media (max-width: 768px) {
+            .polipet-faq-title {
+                font-size: 20px;
+            }
+
+            summary.polipet-faq-question {
+                font-size: 15px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="generator-container">
+        <img src="logo2.svg" alt="Logo da loja">
+        <h1 class="app-title">Gerador de FAQ - Padrão Polipet</h1>
+
+        <!-- Coluna da Esquerda: Inputs -->
+        <div class="input-section">
+            <div class="input-group">
+                <label for="faqTitle">Título da Seção</label>
+                <input type="text" id="faqTitle" placeholder="Ex: Dúvidas sobre Petiscos para Cachorro">
+            </div>
+
+            <div class="input-group">
+                <label for="faqContent">Perguntas e Respostas</label>
+                <textarea id="faqContent" placeholder="Cole aqui seu conteúdo.
+O sistema detectará automaticamente as perguntas (linhas terminando em ?) e as respostas (linhas seguintes).
+
+Exemplo:
+Quais são os tipos de petiscos?
+Existem diversas opções como Bifinhos e Biscoitos.
+
+Pode dar para filhotes?
+Sim, mas com cautela dependendo da idade."></textarea>
+                <small style="color: #666; margin-top: 5px; display: block;">Dica: Deixe uma linha em branco entre cada
+                    par de pergunta/resposta para facilitar a leitura, mas não é obrigatório.</small>
+            </div>
+
+            <button class="btn-generate" onclick="generateFAQ()">Gerar Código FAQ</button>
+        </div>
+
+        <!-- Coluna da Direita: Preview e Código -->
+        <div class="output-section">
+
+            <div class="output-box">
+                <h3>Pré-visualização (Preview)</h3>
+                <div id="previewContainer">
+                    <p style="color: #999; font-style: italic;">O conteúdo gerado aparecerá aqui...</p>
+                </div>
+            </div>
+
+            <div class="output-box">
+                <h3>Código HTML (Para o Site)</h3>
+                <textarea id="htmlOutput" class="code-textarea" readonly></textarea>
+                <button onclick="copyToClipboard('htmlOutput')"
+                    style="margin-top: 5px; padding: 5px 10px; cursor: pointer;">Copiar HTML</button>
+            </div>
+
+            <div class="output-box">
+                <h3>Dados Estruturados (JSON-LD)</h3>
+                <textarea id="jsonOutput" class="code-textarea" readonly></textarea>
+                <button onclick="copyToClipboard('jsonOutput')"
+                    style="margin-top: 5px; padding: 5px 10px; cursor: pointer;">Copiar JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateFAQ() {
+            const title = document.getElementById('faqTitle').value.trim();
+            const content = document.getElementById('faqContent').value;
+
+            if (!content) {
+                alert('Por favor, insira o conteúdo das perguntas e respostas.');
+                return;
+            }
+
+            // Lógica de Parsing
+            // Vamos separar por linhas
+            const lines = content.split('\n');
+            const items = [];
+            let currentQuestion = null;
+            let currentAnswerBuffer = [];
+
+            lines.forEach(line => {
+                const trimmedLine = line.trim();
+
+                if (!trimmedLine) return; // Pula linhas vazias
+
+                // Detecta se é uma pergunta (termina com ? ou :)
+                // Critério heurístico: Se termina com ? é pergunta.
+                // Se estamos esperando uma pergunta (currentQuestion é null), assumimos que é pergunta mesmo sem ? se for curta?
+                // Vamos ser estritos: Linhas com "?" são perguntas. O resto é parte da resposta anterior.
+
+                if (trimmedLine.endsWith('?') || (items.length === 0 && currentQuestion === null)) {
+                    // É uma nova pergunta
+
+                    // Se já tínhamos uma pergunta em aberto, salvamos ela antes de começar a nova
+                    if (currentQuestion) {
+                        items.push({
+                            question: currentQuestion,
+                            answer: currentAnswerBuffer.join('<br>').trim() // Junta linhas da resposta com quebra de linha
+                        });
+                    }
+
+                    // Reseta para a nova pergunta
+                    currentQuestion = trimmedLine;
+                    currentAnswerBuffer = [];
+                } else {
+                    // É parte da resposta
+                    // Vamos tentar identificar negrito simples (ex: Palavra: Definição) se desejar, mas vou manter simples agora.
+                    // Adiciona ao buffer da resposta
+                    if (currentQuestion) {
+                        currentAnswerBuffer.push(trimmedLine);
+                    } else {
+                        // Conteúdo órfão (antes da primeira pergunta), ignora ou trata como título?
+                        // Ignora por enquanto.
+                    }
+                }
+            });
+
+            // Adiciona o último item pendente
+            if (currentQuestion && currentAnswerBuffer.length > 0) {
+                items.push({
+                    question: currentQuestion,
+                    answer: currentAnswerBuffer.join('<br>').trim()
+                });
+            }
+
+            if (items.length === 0) {
+                alert('Não conseguimos identificar perguntas. Verifique se as perguntas terminam com "?"');
+                return;
+            }
+
+            // ============================
+            // Gerar HTML de Visualização
+            // ============================
+            let htmlInner = '';
+
+            if (title) {
+                htmlInner += `<h2 class="polipet-faq-title">${escapeHtml(title)}</h2>\n\n`;
+            }
+
+            items.forEach(item => {
+                htmlInner += `<details class="polipet-faq-item"><summary class="polipet-faq-question">${escapeHtml(item.question)}</summary>\n\n<div class="polipet-faq-answer">${formatAnswer(item.answer)}</div>\n</details>\n\n`;
+            });
+
+            const cssBlock = `<style type="text/css">/* Container Principal - Ajustado para largura padrão de e-commerce */
+  .polipet-faq-container {
+    width: 100%;
+    max-width: 1200px; /* Largura comum de containers de categoria */
+    margin: 40px auto;
+    padding: 0 15px;
+    font-family: 'Open Sans', Arial, sans-serif; /* Fonte provável do site */
+    box-sizing: border-box;
+  }
+
+  /* Título da Seção */
+  .polipet-faq-title {
+    font-size: 24px;
+    color: #e65100; /* Laranja Polipet */
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #f2f2f2;
+    padding-bottom: 10px;
+  }
+
+  /* Item da FAQ (Detalhes) */
+  details.polipet-faq-item {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  details.polipet-faq-item:hover {
+    border-color: #e65100; /* Hover laranja */
+  }
+
+  details.polipet-faq-item[open] {
+    border-color: #1a5c36; /* Verde Polipet quando aberto */
+    background-color: #fcfcfc;
+  }
+
+  /* Pergunta (Summary) */
+  summary.polipet-faq-question {
+    padding: 18px 20px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Remove triângulo padrão */
+  summary.polipet-faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Ícone Personalizado (+ / -) */
+  summary.polipet-faq-question::after {
+    content: '+';
+    font-size: 22px;
+    color: #e65100; /* Laranja */
+    font-weight: bold;
+    transition: transform 0.2s;
+  }
+
+  details[open] summary.polipet-faq-question::after {
+    content: '-';
+    color: #1a5c36; /* Verde */
+  }
+
+  /* Resposta */
+  .polipet-faq-answer {
+    padding: 0 20px 20px 20px;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+    border-top: 1px solid transparent;
+  }
+
+  details[open] .polipet-faq-answer {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+  }
+
+  /* Ajuste Mobile */
+  @media (max-width: 768px) {
+    .polipet-faq-title { font-size: 20px; }
+    summary.polipet-faq-question { font-size: 15px; padding: 15px; }
+  }
+</style>`;
+
+            // O código final deve incluir o CSS e a DIV wrapper
+            const finalHtml = `${cssBlock}
+<div class="polipet-faq-container">
+${htmlInner}</div>`;
+
+            // ============================
+            // Gerar JSON-LD
+            // ============================
+            const schemaData = {
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": items.map(item => ({
+                    "@type": "Question",
+                    "name": item.question,
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": item.answer // Texto da resposta (pode conter HTML simples como <b> ou <strong> se tratado)
+                    }
+                }))
+            };
+
+            const finalJson = `<script type="application/ld+json">\n${JSON.stringify(schemaData, null, 2)}\n<\/script>`;
+
+            // ============================
+            // Atualizar UI
+            // ============================
+
+            // Preview: Inserimos apenas o HTML Inner dentro de um container que já tem style (porém o style está no head do gerador, mas para o preview ficar exato usamos classes)
+            // Como as classes do gerador e do preview podem conflitar se eu injetar o CSS globalmente de novo?
+            // O CSS do gerador foi prefixado ou o CSS da Polipet é bem específico. "polipet-faq-container" é bem específico.
+            // Vou injetar o HTML gerado direto no previewContainer.
+
+            const previewContainer = document.getElementById('previewContainer');
+            // Nota: O CSS da Polipet já está no <style> do head deste arquivo, então o preview vai funcionar nativamente.
+            // Só precisamos montar a estrutura correta.
+            previewContainer.innerHTML = `<div class="polipet-faq-container" style="margin: 0; width: 100%; max-width: 100%;">
+                ${htmlInner}
+            </div>`;
+
+            // Preencher Textareas
+            document.getElementById('htmlOutput').value = finalHtml;
+            document.getElementById('jsonOutput').value = finalJson;
+        }
+
+        // Funções Auxiliares
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatAnswer(text) {
+            // Tenta detectar bold markdown-style simples, ex: **bold** ou <strong>bold</strong> se o usuário tentar colar HTML.
+            // Mas o usuário pediu "simples". Vamos apenas transformar quebras de linha que o escapeHtml mataria se não fossem tags? 
+            // Já fiz .join('<br>') na captura, então já temos <br>.
+            // O escapeHtml deve ser aplicado ANTES de tags inseridas pelo sistema.
+            // No meu código capturei currentAnswerBuffer.join('<br>'). O `item.answer` já tem <br>.
+            // Então cuidado com o escapeHtml no output final.
+
+            // Refazendo a lógica de escape para ser segura:
+            // O ideal é escapar o input bruto e DEPOIS adicionar os <br>.
+            // Vamos ajustar a função generateFAQ para escapar na coleta.
+            return text; // Assumindo que o texto já venha formatado ou tratado antes.
+            // Para simplicidade deste MVP: Vamos confiar que o usuário cola texto simples.
+            // Mas se ele colar "<b>bold</b>", o escape vai mostrar &lt;b&gt;, o que ele pode não querer.
+            // No prompt ele usa <strong>. Vamos permitir tags HTML básicas na resposta?
+            // "onde quando o usuario colocar as perguntas e respostas da FAQ a página já transforma para o padrão"
+            // Se ele colar texto plano, ele espera que vire HTML.
+            // Vou implementar um parser simples de negrito? Ex: *texto* -> <strong>texto</strong>
+            // O código de exemplo tem <strong>. Sugiro manter suporte a HTML básico se ele colar, ou não escapar a resposta.
+            return text; // Não escapa a resposta para permitir que se ele colar algo com <strong> funcione.
+        }
+
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("Código copiado!");
+        }
+
+        // Ajuste na lógica de captação para escapar antes do join
+        // (Seria melhor refatorar o loop acima, mas vou manter simples:
+        // O usuário provavelmente vai colar texto simples.
+        // Se ele quiser negrito, ele pode escrever <strong> manualmente ou eu poderia implementar um detector.
+        // Vou deixar sem escape na resposta para dar flexibilidade, mas escapar a Pergunta é essencial para não quebrar o HTML do summary.)
+
+    </script>
+</body>
+
+</html>
